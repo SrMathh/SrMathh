@@ -19,27 +19,32 @@ log_filename = datetime.now().strftime("testeAutomatico,%d-%m.%H-%M.log")
 
 def log_message(message):
     """
-    Registra uma mensagem em um arquivo de log e a exibe no console.
-
-    Parâmetros:
-    - message (str): Texto da mensagem a ser registrada.
-
-    Retorno:
-    - Nenhum. Apenas escreve no arquivo de log e imprime no console.
+    Registra uma mensagem no log e imprime no console sem erros de codificação.
     """
 
-    # Gera um timestamp para cada linha do log
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # Substituir emojis por texto alternativo caso a codificação falhe
+    replacements = {
+        "✅": "[OK]",
+        "⚠️": "[ALERTA]",
+        "❌": "[ERRO]",
+        "⏳": "[AGUARDANDO]",
+        "🚀": "[INICIANDO]",
+        "🔍": "[VERIFICANDO]",
+        "🔧": "[CONFIGURANDO]"
+    }
 
-    # Formata a linha do log com timestamp e mensagem
-    log_entry = f"[{timestamp}] {message}\n"
+    for emoji, replacement in replacements.items():
+        message = message.replace(emoji, replacement)
 
-    # Abre o arquivo de log em modo de anexação ('a') e grava a mensagem com codificação UTF-8
-    with open(log_filename, "a", encoding="utf-8") as log_file:
-        log_file.write(log_entry)
+    # Força a saída no console para UTF-8
+    try:
+        print(message.encode(sys.stdout.encoding, errors='replace').decode(sys.stdout.encoding))
+    except UnicodeEncodeError:
+        print(message.encode("utf-8", "ignore").decode("utf-8"))  # Se der erro, ignora caracteres inválidos
 
-    # Exibe a mensagem no console para feedback imediato
-    print(message.encode("utf-8", "ignore").decode("utf-8"))
+    # Salvar no arquivo de log com UTF-8 para evitar erros ao ler depois
+    with open("log.txt", "a", encoding="utf-8") as log_file:
+        log_file.write(message + "\n")
 
 
 def fill_field(driver, identifier, identifier_type, value, action_name="", timeout=20):
