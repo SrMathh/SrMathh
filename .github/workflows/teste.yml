@@ -45,7 +45,7 @@ jobs:
 
       - name: 📤 Upload de Logs (se falhar)
         if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: logs-de-teste
           path: testeAutomatico,*.log
