@@ -34,8 +34,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: 🌐 Instalar WebDriver do Chrome
-        run: |
-          choco install chromedriver --version=114.0.5735.90 -y
+        run: choco install chromedriver -y
         continue-on-error: true  # Ignora erro se o driver já estiver instalado
 
       - name: ✅ Rodar Testes Automatizados
