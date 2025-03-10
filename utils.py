@@ -39,7 +39,7 @@ def log_message(message):
         log_file.write(log_entry)
 
     # Exibe a mensagem no console para feedback imediato
-    print(message)
+    print(message.encode("utf-8", "ignore").decode("utf-8"))
 
 
 def fill_field(driver, identifier, identifier_type, value, action_name="", timeout=20):
