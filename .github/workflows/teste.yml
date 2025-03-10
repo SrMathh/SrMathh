@@ -36,6 +36,9 @@ jobs:
       - name: 🌐 Instalar WebDriver do Chrome
         run: choco install chromedriver -y
         continue-on-error: true  # Ignora erro se o driver já estiver instalado
+        
+      - name: Definir UTF-8 para Python
+        run: echo PYTHONUTF8=1 >> $GITHUB_ENV
 
       - name: Criar arquivo .env
         run: |
@@ -43,6 +46,9 @@ jobs:
           echo "PASSWORD=Noclaf@1234" >> .env
           echo "API_KEY=2M8ZMVbXGPtDIEsV8wlzDmVNwy9AlIpwAlULQCdB0JVvAnT8b4mpYqUGS8niN1ju" >> .env
           echo "URL_API=https://api.staging.voiston.ai/api/DataPartner/v1/Patient/Delete/" >> .env
+
+      - name: Configurar UTF-8 no Windows
+        run: chcp 65001
 
       - name: ✅ Rodar Testes Automatizados
         run: |
