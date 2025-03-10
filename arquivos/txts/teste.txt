@@ -1,0 +1,51 @@
+
+REFRATOMETRIA
+Longe
+                - Olho Direito
+Esférico: ++0.50, Cilindro: -1.75, Eixo: 70
+Longe
+                - Olho Esquerdo
+Esférico: ++0.25, Cilindro: +0.00, Eixo: 0
+
+
+
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------
+ÓCULOS
+OD Esférico: 0.00, OD Cilíndrico: 0.00, OD Eixo: 0, OE Esférico: +0.75, OE Cilíndrico: -1.00, OE Eixo: 97, Adição: +2.75
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------
+<div data-v-f05e41ca="" class="mt-1">
+
+    Sem Ciclopegia
+Longe OD
+Esf: 10, Cil: 8, Eix: 3
+Longe OE
+Esf: 4, Cil: 5, Eix: 7
+Perto OD
+Esf: 6, Cil: 10, Eix: 11
+Perto OE
+Esf: +2.50, Cil: 6, Eix: 2
+
+</div>

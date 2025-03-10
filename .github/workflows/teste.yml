@@ -1,0 +1,51 @@
+name: Teste Automatizado no Windows
+
+on:
+  push:
+    branches:
+      - main  # Dispara o workflow ao enviar código para a branch "main"
+  pull_request:
+    branches:
+      - main  # Também executa o workflow em pull requests para a branch "main"
+  workflow_dispatch:  # Permite rodar manualmente pelo GitHub Actions
+
+jobs:
+  test:
+    runs-on: windows-latest  # Define o runner como Windows
+
+    steps:
+      - name: 📥 Checkout do Código
+        uses: actions/checkout@v3
+
+      - name: 🛠️ Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"  # Versão do Python compatível com seu ambiente
+
+      - name: 📂 Configurar Ambiente Virtual
+        run: |
+          python -m venv venv
+          venv\Scripts\activate
+          python -m pip install --upgrade pip
+
+      - name: 📦 Instalar Dependências
+        run: |
+          venv\Scripts\activate
+          pip install -r requirements.txt
+
+      - name: 🌐 Instalar WebDriver do Chrome
+        run: |
+          choco install chromedriver --version=114.0.5735.90 -y
+        continue-on-error: true  # Ignora erro se o driver já estiver instalado
+
+      - name: ✅ Rodar Testes Automatizados
+        run: |
+          venv\Scripts\activate
+          python start.py
+
+      - name: 📤 Upload de Logs (se falhar)
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: logs-de-teste
+          path: testeAutomatico,*.log

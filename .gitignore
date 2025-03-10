@@ -1,0 +1,24 @@
+# Diretórios do Python
+__pycache__/
+venv/
+.env
+
+# Arquivos gerados pelo PyInstaller
+build/
+dist/
+*.spec
+
+# Dependências instaladas
+*.egg-info/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Arquivos do VSCode
+.vscode/
+
+# Logs e arquivos temporários
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
