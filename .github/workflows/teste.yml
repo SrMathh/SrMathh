@@ -37,6 +37,13 @@ jobs:
         run: choco install chromedriver -y
         continue-on-error: true  # Ignora erro se o driver já estiver instalado
 
+      - name: Criar arquivo .env
+        run: |
+          echo "EMAIL=lucianomaia@noclaftech.com" >> .env
+          echo "PASSWORD=Noclaf@1234" >> .env
+          echo "API_KEY=2M8ZMVbXGPtDIEsV8wlzDmVNwy9AlIpwAlULQCdB0JVvAnT8b4mpYqUGS8niN1ju" >> .env
+          echo "URL_API=https://api.staging.voiston.ai/api/DataPartner/v1/Patient/Delete/" >> .env
+
       - name: ✅ Rodar Testes Automatizados
         run: |
           venv\Scripts\activate
