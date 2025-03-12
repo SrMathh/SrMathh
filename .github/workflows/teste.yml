@@ -61,9 +61,3 @@ jobs:
         with:
           name: logs-de-teste
           path: testeAutomatico,*.log
-          
-      - name: 📤 Upload do Arquivo de Log
-        uses: actions/upload-artifact@v4
-        with:
-          name: logs-de-teste
-          path: log.txt
