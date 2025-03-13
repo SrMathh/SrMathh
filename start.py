@@ -12,8 +12,8 @@ import re
 from datetime import datetime
 import threading
 
-# Gera o nome do arquivo de log com data e hora do momento da execução
-log_filename = datetime.now().strftime("testeAutomatico,%d-%m.%H-%M.log")
+# Gera o nome do arquivo de log
+log_filename = "testeAutomatico.log"
 
 def log_message(message):
     """
@@ -43,7 +43,6 @@ def log_message(message):
     # Salvar no arquivo de log com UTF-8 para evitar erros ao ler depois
     with open("log.txt", "a", encoding="utf-8") as log_file:
         log_file.write(message + "\n")
-        
 # Bloqueio para evitar múltiplas execuções
 lock = threading.Lock()
 

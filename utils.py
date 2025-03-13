@@ -14,8 +14,8 @@ import pyautogui
 
 from datetime import datetime
 
-# Gera o nome do arquivo de log com data e hora do momento da execução
-log_filename = datetime.now().strftime("testeAutomatico,%d-%m.%H-%M.log")
+# Gera o nome do arquivo de log
+log_filename = "testeAutomatico.log"
 
 def log_message(message):
     """
