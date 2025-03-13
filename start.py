@@ -41,8 +41,9 @@ def log_message(message):
         print(message.encode("utf-8", "ignore").decode("utf-8"))  # Se der erro, ignora caracteres inválidos
 
     # Salvar no arquivo de log com UTF-8 para evitar erros ao ler depois
-    with open("log.txt", "a", encoding="utf-8") as log_file:
+    with open(log_filename, "a", encoding="utf-8") as log_file:
         log_file.write(message + "\n")
+
 # Bloqueio para evitar múltiplas execuções
 lock = threading.Lock()
 
