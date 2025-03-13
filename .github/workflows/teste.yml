@@ -55,14 +55,8 @@ jobs:
           venv\Scripts\activate
           python start.py
 
-      - name: 📤 Identificar e Fazer Upload do Arquivo de Log
-        run: |
-          LOG_FILE=$(ls testeAutomatico,*.log)  # Captura o nome correto do log
-          echo "LOG_FILE=$LOG_FILE" >> $GITHUB_ENV  # Define como variável de ambiente
-        shell: bash
-
-      - name: 📤 Upload de Logs
+      - name: 📤 Upload do Arquivo de Log
         uses: actions/upload-artifact@v4
         with:
           name: logs-de-teste
-          path: ${{ env.LOG_FILE }}
+          path: testeAutomatico.log
