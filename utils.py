@@ -8,11 +8,9 @@ import sys
 import subprocess
 import requests
 import shutil 
-from datetime import datetime
 from dotenv import load_dotenv
 import pyautogui
 
-from datetime import datetime
 
 # Gera o nome do arquivo de log
 log_filename = "testeAutomatico.log"
@@ -313,6 +311,8 @@ def check_text_on_page(driver, text, timeout, check_interval=5):
         # Aguarda o intervalo definido antes de verificar novamente
         time.sleep(check_interval)
 
+
+
 def get_number(driver, identifier, identifier_type, action_name="", timeout=20):
     """
     Localiza um elemento que contém uma numeração e retorna o valor encontrado.
@@ -354,25 +354,25 @@ def get_number(driver, identifier, identifier_type, action_name="", timeout=20):
 
         # Se o elemento estiver visível, mas sem texto, exibe um aviso
         if not badge_number:
-            log_message(f"⚠️ Aviso: O elemento com {identifier_type} '{identifier}' foi encontrado, mas está vazio.")
+           print(f"⚠️ Aviso: O elemento com {identifier_type} '{identifier}' foi encontrado, mas está vazio.")
         else:
-            log_message(f"✅ Numeração capturada: {badge_number}")
+           print(f"✅ Numeração capturada: {badge_number}")
 
     except TimeoutException:
         # Se o tempo limite for atingido e o elemento não for encontrado
-        log_message(f"❌ Erro: O elemento com {identifier_type} '{identifier}' não foi encontrado após {timeout} segundos.")
+       print(f"❌ Erro: O elemento com {identifier_type} '{identifier}' não foi encontrado após {timeout} segundos.")
 
     except NoSuchElementException:
         # Se o elemento não existir na página
-        log_message(f"❌ Erro: O elemento com {identifier_type} '{identifier}' não foi encontrado.")
+       print(f"❌ Erro: O elemento com {identifier_type} '{identifier}' não foi encontrado.")
 
     except ValueError as ve:
         # Se o tipo de identificador for inválido
-        log_message(f"❌ Erro de valor: {ve}")
+       print(f"❌ Erro de valor: {ve}")
 
     except Exception as e:
         # Qualquer outro erro inesperado
-        log_message(f"❌ Ocorreu um erro inesperado: {e}")
+       print(f"❌ Ocorreu um erro inesperado: {e}")
 
     finally:
         # Calcula o tempo de execução da ação
@@ -626,3 +626,68 @@ def extract_data(driver):
                 f"Grupos: {extracted_data['groups']}")
 
     return extracted_data
+
+def check_and_refresh(driver, text, timeout, refresh_interval=60):
+    """
+    Verifica continuamente se um texto específico ainda está presente na página e atualiza a página se necessário.
+
+    Parâmetros:
+    - driver (WebDriver): Instância do Selenium WebDriver.
+    - text (str): Texto a ser verificado na página.
+    - timeout (int): Tempo máximo para aguardar a remoção do texto (em segundos).
+    - refresh_interval (int, opcional): Intervalo entre verificações e atualizações (padrão: 35 segundos).
+
+    Retorno:
+    - True: Se o texto desaparecer antes do tempo limite.
+    - False: Se o texto ainda estiver presente após o tempo limite.
+    """
+
+    start_time = time.time()  # Marca o início da verificação
+    last_refresh = start_time  # Marca a última atualização
+
+    log_message(f"🔍 Iniciando verificação do texto: '{text}'")
+
+    while time.time() - start_time < timeout:
+        try:
+            # Busca o texto na página
+            element_present = driver.find_elements(By.XPATH, f"//*[contains(text(), '{text}')]")
+
+            # Se o texto sumiu, retorna imediatamente
+            if not element_present:
+                log_message(f"✅ O texto '{text}' desapareceu da página.")
+                return True  # Encerra a verificação com sucesso
+
+            elapsed_time = time.time() - start_time  # Tempo decorrido
+
+            # Nos primeiros 60 segundos, apenas verifica sem atualizar a página
+            if elapsed_time < 60:
+                time.sleep(2)
+                continue
+
+            # Se passou dos 60s e o texto ainda está na página, faz refresh, mas limita a quantidade de tentativas
+            if time.time() - last_refresh > refresh_interval:
+                driver.refresh()  # Faz refresh da página
+                last_refresh = time.time()  # Atualiza o tempo do último refresh
+                
+                try:
+                    WebDriverWait(driver, 60).until_not(
+                        EC.presence_of_element_located((By.CLASS_NAME, "mat-progress-bar-buffer"))
+                    )
+                    WebDriverWait(driver, 20).until(
+                        EC.presence_of_element_located((By.TAG_NAME, "mat-expansion-panel-header"))
+                    )
+                except Exception as e:
+                    print(f"⚠️ {e}")
+
+                # Espera 3 segundos adicionais após o refresh para estabilizar a página
+                time.sleep(3)
+
+        except Exception as e:
+            log_message(f"❌ Erro ao verificar '{text}': {e}")
+            return False
+
+        # Pequeno intervalo antes da próxima verificação
+        time.sleep(3)
+
+    log_message(f"⏳ Tempo limite atingido! O texto '{text}' ainda está na página.")
+    return False

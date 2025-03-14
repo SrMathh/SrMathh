@@ -2,10 +2,11 @@ import time
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 import psutil
-from utils import fill_field, click_element, check_text_on_page, send_files, get_number, identify_fields, delete_patient, install_requirements, load_env_file, extract_data
+from utils import fill_field, click_element, check_text_on_page, send_files, get_number, identify_fields, delete_patient, install_requirements, load_env_file, extract_data, check_and_refresh
 import os
 import sys
 import re
@@ -266,12 +267,13 @@ class Action:
             log_message("⏳ Aguardando processamento...")
 
             # Define o tempo máximo de espera (5 minutos)
-            timeout = 400  
+            timeout = 600  
             
             # Verifica se a mensagem "Enviando arquivos..." desaparece
             while time.time() - start_time < timeout:
                 if not check_text_on_page(self.driver, 'Enviando arquivos...', timeout=timeout):
-                    log_message("✅ Texto 'Enviando arquivos...' desapareceu. Continuando processamento...")
+                    execution_time = time.time() - start_time
+                    log_message(f"✅ Enviando arquivos... Upload executado em {execution_time:.2f} segundos.")
                     break
                 time.sleep(3)  # Pausa de 5 segundos para estabilidade
                 log_message("⏳ Processamento ainda em andamento...")
@@ -288,28 +290,28 @@ class Action:
 
             # Segunda verificação: espera até que "Aguardando processamento" ou "Processando:" desapareça
             while time.time() - start_time < timeout:
-                aguarde = check_text_on_page(self.driver, 'Aguardando processamento', timeout=timeout)
-                processando = check_text_on_page(self.driver, 'Processando:', timeout=timeout)
+                aguarde = check_and_refresh(self.driver, 'Aguardando processamento', timeout=timeout)
+                processando = check_and_refresh(self.driver, 'Processando:', timeout=timeout)
 
                 if not aguarde and not processando:
                     # Se ambos os textos desapareceram, o processamento terminou
-                    log_message("✅ Texto 'Aguardando processamento' desapareceu. Continuando...")
+                    execution_time1 = time.time() - start_time
+                    log_message(f"✅ Processamento de prontuarios executado em {execution_time1:.2f}.")
                     break
 
-                else:
-                    log_message("❌ Timeout: Nenhum dos textos desapareceu no tempo limite.")
-                    return  # Se o tempo limite for atingido, encerra a função
+            else:
+                log_message("❌ Timeout atingido em processamento dos prontuários.")
 
             time.sleep(1)  # Pequena pausa para estabilidade
             extract_data(self.driver)
             time.sleep(1)  # Pequena pausa antes de finalizar
 
         except Exception as e:
-            log_message(f"❌ Erro durante processamento: {e}")
+            log_message(f"❌ Erro durante processamento dos prontuarios: {e}")
 
         finally:
-            execution_time = time.time() - start_time  # Calcula o tempo total de execução
-            log_message(f"⏳ Ação 'Processamento' concluída em {execution_time:.2f} segundos.")
+            execution_time2 = time.time() - start_time  # Calcula o tempo total de execução
+            log_message(f"⏳ Processamento dos prontuarios concluída em {execution_time2:.2f} segundos.")
     
     def check_exams(self):
         """
@@ -334,7 +336,7 @@ class Action:
             click_element(self.driver, "//mat-icon[text()='cloud_download']/parent::a", 'xpath', 'Click Exames enviados')
             time.sleep(2)  # Pausa para garantir que a página carregue
             # Tempo limite para o processamento (5 minutos)
-            timeout = 400
+            timeout = 600
             start_time = time.time()
 
             # Aguarda o desaparecimento dos textos de "Aguardando processamento" ou "Exame aguardando processamento"
@@ -345,12 +347,20 @@ class Action:
                 if not waiting and not exam:
                     # Se ambos os textos desapareceram, o processamento terminou
                     execution_time = time.time() - start_time
-                    log_message(f"✅ Processamento concluído em {execution_time:.2f} segundos. Continuando...")
+                    log_message(f"✅ Processamento dos exames concluído em {execution_time:.2f} segundos.")
                     break
 
                 log_message("⏳ Processamento ainda em andamento...")
-                time.sleep(5)  # Pausa de 5 segundos para estabilidade
+                time.sleep(3)  # Pausa de 5 segundos para estabilidade
                 click_element(self.driver, "//mat-icon[text()='update']", 'xpath', 'Click Atualizando Envios')
+                time.sleep(1)  # Pequena pausa para garantir estabilidade
+                WebDriverWait(self.driver, 60).until_not(
+                        EC.presence_of_element_located((By.CLASS_NAME, "mat-progress-bar-buffer"))
+                    )
+                WebDriverWait(self.driver, 20).until(
+                        EC.presence_of_element_located((By.TAG_NAME, "mat-expansion-panel-header"))
+                    )
+
             else:
                 log_message("❌ Timeout: Texto 'Aguardando processamento' ainda presente após 5 minutos.")
 
@@ -362,6 +372,10 @@ class Action:
             log_message(f" Foram encontrados nos Arquivos de Exames Enviados {medidas} Medidas e {erros} Erros.")
             click_element(self.driver, "//a//img[@src='/assets/icon/VOISTON_ICONS-11.svg']", 'xpath', 'Click Exames')
             time.sleep(1)  # Pequena pausa para garantir estabilidade
+            WebDriverWait(self.driver, 60).until_not(
+                        EC.presence_of_element_located((By.CLASS_NAME, "mat-progress-bar-buffer"))
+                    )
+            time.sleep(2)
             extract_data(self.driver)
             time.sleep(1)  # Pequena pausa antes de finalizar
 
